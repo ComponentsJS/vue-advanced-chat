@@ -5,7 +5,7 @@
 		version="1.1"
 		width="24"
 		height="24"
-		viewBox="0 0 24 24"
+		:viewBox="`0 0 ${size} ${size}`"
 	>
 		<path :id="svgId" :d="svgItem.find(item => item.name === name).path" />
 	</svg>
@@ -13,14 +13,11 @@
 
 <script>
 export default {
-	name: 'svg-icon',
-	props: ['name', 'path', 'param'],
+	name: 'SvgIcon',
 
-	computed: {
-		svgId() {
-			const param = this.param ? '-' + this.param : ''
-			return `chat-icon-${this.name}${param}`
-		}
+	props: {
+		name: { type: String, default: null },
+		param: { type: String, default: null }
 	},
 
 	data() {
@@ -90,6 +87,11 @@ export default {
 					path: 'M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'
 				},
 				{
+					name: 'double-checkmark',
+					path:
+						'M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z'
+				},
+				{
 					name: 'eye',
 					path:
 						'M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z'
@@ -97,87 +99,130 @@ export default {
 				{
 					name: 'dropdown',
 					path: 'M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z'
+				},
+				{
+					name: 'deleted',
+					path:
+						'M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z'
+				},
+				{
+					name: 'microphone',
+					large: true,
+					path:
+						'M432.8,216.4v39.2c0,45.2-15.3,84.3-45.2,118.4c-29.8,33.2-67.3,52.8-111.6,57.9v40.9h78.4c5.1,0,10.2,1.7,13.6,6c4.3,4.3,6,8.5,6,13.6c0,5.1-1.7,10.2-6,13.6c-4.3,4.3-8.5,6-13.6,6H157.6c-5.1,0-10.2-1.7-13.6-6c-4.3-4.3-6-8.5-6-13.6c0-5.1,1.7-10.2,6-13.6c4.3-4.3,8.5-6,13.6-6H236v-40.9c-44.3-5.1-81.8-23.9-111.6-57.9s-45.2-73.3-45.2-118.4v-39.2c0-5.1,1.7-10.2,6-13.6c4.3-4.3,8.5-6,13.6-6s10.2,1.7,13.6,6c4.3,4.3,6,8.5,6,13.6v39.2c0,37.5,13.6,70.7,40,97.1s59.6,40,97.1,40s70.7-13.6,97.1-40c26.4-26.4,40-59.6,40-97.1v-39.2c0-5.1,1.7-10.2,6-13.6c4.3-4.3,8.5-6,13.6-6c5.1,0,10.2,1.7,13.6,6C430.2,206.2,432.8,211.3,432.8,216.4z M353.5,98v157.6c0,27.3-9.4,50.3-29,69c-19.6,19.6-42.6,29-69,29s-50.3-9.4-69-29c-19.6-19.6-29-42.6-29-69V98c0-27.3,9.4-50.3,29-69c19.6-19.6,42.6-29,69-29s50.3,9.4,69,29C344.2,47.7,353.5,71.6,353.5,98z'
+				},
+				{
+					name: 'microphone-off',
+					large: true,
+					path:
+						'M432.8,216.4v39.2c0,45.2-15.3,84.3-45.2,118.4c-29.8,33.2-67.3,52.8-111.6,57.9v40.9h78.4c5.1,0,10.2,1.7,13.6,6c4.3,4.3,6,8.5,6,13.6c0,5.1-1.7,10.2-6,13.6c-4.3,4.3-8.5,6-13.6,6H157.6c-5.1,0-10.2-1.7-13.6-6c-4.3-4.3-6-8.5-6-13.6c0-5.1,1.7-10.2,6-13.6c4.3-4.3,8.5-6,13.6-6H236v-40.9c-44.3-5.1-81.8-23.9-111.6-57.9s-45.2-73.3-45.2-118.4v-39.2c0-5.1,1.7-10.2,6-13.6c4.3-4.3,8.5-6,13.6-6s10.2,1.7,13.6,6c4.3,4.3,6,8.5,6,13.6v39.2c0,37.5,13.6,70.7,40,97.1s59.6,40,97.1,40s70.7-13.6,97.1-40c26.4-26.4,40-59.6,40-97.1v-39.2c0-5.1,1.7-10.2,6-13.6c4.3-4.3,8.5-6,13.6-6c5.1,0,10.2,1.7,13.6,6C430.2,206.2,432.8,211.3,432.8,216.4z M353.5,98v157.6c0,27.3-9.4,50.3-29,69c-19.6,19.6-42.6,29-69,29s-50.3-9.4-69-29c-19.6-19.6-29-42.6-29-69V98c0-27.3,9.4-50.3,29-69c19.6-19.6,42.6-29,69-29s50.3,9.4,69,29C344.2,47.7,353.5,71.6,353.5,98z'
 				}
 			]
+		}
+	},
+
+	computed: {
+		svgId() {
+			const param = this.param ? '-' + this.param : ''
+			return `vac-icon-${this.name}${param}`
+		},
+		size() {
+			return this.svgItem.find(item => item.name === this.name).large
+				? '512'
+				: '24'
 		}
 	}
 }
 </script>
 
 <style lang="scss">
-#chat-icon-search {
+#vac-icon-search {
 	fill: var(--chat-icon-color-search);
 }
 
-#chat-icon-add {
+#vac-icon-add {
 	fill: var(--chat-icon-color-add);
 }
 
-#chat-icon-toggle {
+#vac-icon-toggle {
 	fill: var(--chat-icon-color-toggle);
 }
 
-#chat-icon-menu {
+#vac-icon-menu {
 	fill: var(--chat-icon-color-menu);
 }
 
-#chat-icon-close {
+#vac-icon-close {
 	fill: var(--chat-icon-color-close);
 }
 
-#chat-icon-close-image {
+#vac-icon-close-image {
 	fill: var(--chat-icon-color-close-image);
 }
 
-#chat-icon-file {
+#vac-icon-file {
 	fill: var(--chat-icon-color-file);
 }
 
-#chat-icon-paperclip {
+#vac-icon-paperclip {
 	fill: var(--chat-icon-color-paperclip);
 }
 
-#chat-icon-close-outline {
+#vac-icon-close-outline {
 	fill: var(--chat-icon-color-close-outline);
 }
 
-#chat-icon-send {
+#vac-icon-send {
 	fill: var(--chat-icon-color-send);
 }
 
-#chat-icon-send-disabled {
+#vac-icon-send-disabled {
 	fill: var(--chat-icon-color-send-disabled);
 }
 
-#chat-icon-emoji {
+#vac-icon-emoji {
 	fill: var(--chat-icon-color-emoji);
 }
 
-#chat-icon-emoji-reaction {
+#vac-icon-emoji-reaction {
 	fill: var(--chat-icon-color-emoji-reaction);
 }
 
-#chat-icon-document {
+#vac-icon-document {
 	fill: var(--chat-icon-color-document);
 }
 
-#chat-icon-pencil {
+#vac-icon-pencil {
 	fill: var(--chat-icon-color-pencil);
 }
 
-#chat-icon-checkmark {
+#vac-icon-checkmark,
+#vac-icon-double-checkmark {
 	fill: var(--chat-icon-color-checkmark);
 }
 
-#chat-icon-eye {
+#vac-icon-checkmark-seen,
+#vac-icon-double-checkmark-seen {
+	fill: var(--chat-icon-color-checkmark-seen);
+}
+
+#vac-icon-eye {
 	fill: var(--chat-icon-color-eye);
 }
 
-#chat-icon-dropdown-message {
+#vac-icon-dropdown-message {
 	fill: var(--chat-icon-color-dropdown-message);
 }
 
-#chat-icon-dropdown-scroll {
+#vac-icon-dropdown-room {
+	fill: var(--chat-icon-color-dropdown-room);
+}
+
+#vac-icon-dropdown-scroll {
 	fill: var(--chat-icon-color-dropdown-scroll);
+}
+
+#vac-icon-microphone-off {
+	fill: var(--chat-icon-color-microphone-off);
 }
 </style>

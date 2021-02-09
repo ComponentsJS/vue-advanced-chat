@@ -1,23 +1,30 @@
 <template>
-	<transition name="fade-spinner" appear>
+	<transition name="vac-fade-spinner" appear>
 		<div
-			:class="{ 'container-center': !infinite, 'container-top': infinite }"
 			v-if="show"
+			:class="{
+				'vac-container-center': !infinite,
+				'vac-container-top': infinite
+			}"
 		>
-			<div id="circle"></div>
+			<div id="vac-circle" />
 		</div>
 	</transition>
 </template>
 
 <script>
 export default {
-	name: 'loader',
-	props: ['show', 'infinite']
+	name: 'Loader',
+
+	props: {
+		show: { type: Boolean, default: false },
+		infinite: { type: Boolean, default: false }
+	}
 }
 </script>
 
 <style lang="scss" scoped>
-.container-center {
+.vac-container-center {
 	position: absolute;
 	left: 50%;
 	top: 50%;
@@ -25,16 +32,16 @@ export default {
 	z-index: 9;
 }
 
-.container-top {
+.vac-container-top {
 	padding: 21px;
 
-	#circle {
+	#vac-circle {
 		height: 20px;
 		width: 20px;
 	}
 }
 
-#circle {
+#vac-circle {
 	margin: auto;
 	height: 28px;
 	width: 28px;
@@ -43,27 +50,27 @@ export default {
 	border-right: 3px var(--chat-color-spinner) solid;
 	border-bottom: 3px var(--chat-color-spinner) solid;
 	border-radius: 50%;
-	-webkit-animation: spin 1s infinite linear;
-	animation: spin 1s infinite linear;
+	-webkit-animation: vac-spin 1s infinite linear;
+	animation: vac-spin 1s infinite linear;
 }
 
 @media only screen and (max-width: 768px) {
-	#circle {
+	#vac-circle {
 		height: 24px;
 		width: 24px;
 	}
 
-	.container-top {
+	.vac-container-top {
 		padding: 18px;
 
-		#circle {
+		#vac-circle {
 			height: 16px;
 			width: 16px;
 		}
 	}
 }
 
-@-webkit-keyframes spin {
+@-webkit-keyframes vac-spin {
 	from {
 		-webkit-transform: rotate(0deg);
 		transform: rotate(0deg);
@@ -73,7 +80,7 @@ export default {
 		transform: rotate(359deg);
 	}
 }
-@keyframes spin {
+@keyframes vac-spin {
 	from {
 		-webkit-transform: rotate(0deg);
 		transform: rotate(0deg);

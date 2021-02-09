@@ -1,25 +1,27 @@
 <template>
-	<div class="wrapper">
-		<emoji-picker @emoji="append" :search="search">
+	<div class="vac-wrapper">
+		<emoji-picker :search="search" @emoji="append">
 			<div
-				class="svg-button"
-				:class="{ 'button-reaction': emojiReaction }"
 				slot="emoji-invoker"
 				slot-scope="{ events: { click: clickEvent } }"
+				class="vac-svg-button"
+				:class="{ 'vac-button-reaction': emojiReaction }"
 				@click.stop="clickEvent"
 				@click="openEmoji"
 			>
-				<svg-icon name="emoji" :param="emojiReaction ? 'reaction' : ''" />
+				<slot name="emoji-picker-icon">
+					<svg-icon name="emoji" :param="emojiReaction ? 'reaction' : ''" />
+				</slot>
 			</div>
 			<div
+				v-if="emojiOpened"
 				slot="emoji-picker"
 				slot-scope="{ emojis, insert }"
-				v-if="emojiOpened"
 			>
-				<transition name="slide-up" appear>
+				<transition name="vac-slide-up" appear>
 					<div
-						class="emoji-picker"
-						:class="{ 'picker-reaction': emojiReaction }"
+						class="vac-emoji-picker"
+						:class="{ 'vac-picker-reaction': emojiReaction }"
 						:style="{
 							height: `${emojiPickerHeight}px`,
 							top: positionTop ? emojiPickerHeight : `${emojiPickerTop}px`,
@@ -27,18 +29,20 @@
 							display: emojiPickerTop || !emojiReaction ? 'initial' : 'none'
 						}"
 					>
-						<div class="emoji-picker__search">
-							<input type="text" v-model="search" />
+						<div class="vac-emoji-picker__search">
+							<input v-model="search" type="text" />
 						</div>
 						<div>
 							<div v-for="(emojiGroup, category) in emojis" :key="category">
-								<h5 v-if="category !== 'Frequently used'">{{ category }}</h5>
-								<div class="emojis" v-if="category !== 'Frequently used'">
+								<h5 v-if="category !== 'Frequently used'">
+									{{ category }}
+								</h5>
+								<div v-if="category !== 'Frequently used'" class="vac-emojis">
 									<span
 										v-for="(emoji, emojiName) in emojiGroup"
 										:key="emojiName"
-										@click="insert({ emoji, emojiName })"
 										:title="emojiName"
+										@click="insert({ emoji, emojiName })"
 									>
 										{{ emoji }}
 									</span>
@@ -54,6 +58,7 @@
 
 <script>
 import EmojiPicker from 'vue-emoji-picker'
+
 import SvgIcon from './SvgIcon'
 
 export default {
@@ -61,13 +66,15 @@ export default {
 		EmojiPicker,
 		SvgIcon
 	},
-	props: [
-		'emojiOpened',
-		'emojiReaction',
-		'roomFooterRef',
-		'positionTop',
-		'positionRight'
-	],
+
+	props: {
+		emojiOpened: { type: Boolean, default: false },
+		emojiReaction: { type: Boolean, default: false },
+		roomFooterRef: { type: HTMLDivElement, default: null },
+		positionTop: { type: Boolean, default: false },
+		positionRight: { type: Boolean, default: false }
+	},
+
 	data() {
 		return {
 			search: '',
@@ -76,12 +83,13 @@ export default {
 			emojiPickerRight: ''
 		}
 	},
+
 	methods: {
 		append({ emoji, emojiName }) {
-			this.$emit('addEmoji', { icon: emoji, name: emojiName })
+			this.$emit('add-emoji', { icon: emoji, name: emojiName })
 		},
 		openEmoji(ev) {
-			this.$emit('openEmoji', true)
+			this.$emit('open-emoji', true)
 			this.setEmojiPickerPosition(
 				ev.clientY,
 				ev.view.innerWidth,
@@ -122,12 +130,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wrapper {
+.vac-wrapper {
 	position: relative;
 	display: flex;
 }
 
-.emoji-picker {
+.vac-emoji-picker {
 	position: absolute;
 	z-index: 9999;
 	bottom: 32px;
@@ -142,17 +150,17 @@ export default {
 		0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 2px 1px rgba(0, 0, 0, 0.1);
 }
 
-.picker-reaction {
+.vac-picker-reaction {
 	position: fixed;
 	top: initial;
 	right: initial;
 }
 
-.emoji-picker__search {
+.vac-emoji-picker__search {
 	display: flex;
 }
 
-.emoji-picker__search > input {
+.vac-emoji-picker__search > input {
 	flex: 1;
 	border-radius: 10rem;
 	border: var(--chat-border-style);
@@ -162,7 +170,7 @@ export default {
 	color: var(--chat-color);
 }
 
-.emoji-picker h5 {
+.vac-emoji-picker h5 {
 	margin: 15px 0 8px;
 	color: #b1b1b1;
 	text-transform: uppercase;
@@ -170,29 +178,29 @@ export default {
 	cursor: default;
 }
 
-.emoji-picker .emojis {
+.vac-emoji-picker .vac-emojis {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
 }
 
-.emoji-picker .emojis:after {
+.vac-emoji-picker .vac-emojis:after {
 	content: '';
 	flex: auto;
 }
 
-.emoji-picker .emojis span {
+.vac-emoji-picker .vac-emojis span {
 	padding: 0.2rem;
 	cursor: pointer;
 	border-radius: 5px;
 }
 
-.emoji-picker .emojis span:hover {
+.vac-emoji-picker .vac-emojis span:hover {
 	background: var(--chat-sidemenu-bg-color-hover);
 	cursor: pointer;
 }
 
-.button-reaction svg {
+.vac-button-reaction svg {
 	height: 19px;
 	width: 19px;
 }

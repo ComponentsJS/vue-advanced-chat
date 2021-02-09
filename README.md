@@ -15,20 +15,46 @@
 - Realtime chat messaging
 - Customizeable
 - Backend agnostic
-- Images, files & emojis
+- Images, videos, files, voice messages & emojis
 - Edit messages
 - Reply to other messages
-- UI elements for seen, new, deleted and typing messages
-- Online / Offline status
+- Tag users
+- UI elements for seen, new, deleted, typing and system messages
+- Text formatting - bold, italic, strikethrough, code
+- Online / Offline users status
 - Flexible options
 - Custom theming - light and dark modes
 - Firestore example
+- Typescript support
 - PWA support
 - Web Component support
 
 ## [Demo](https://antoine92190.github.io/vue-advanced-chat)
 
 Enjoy :smile:
+
+## [Real World Example](https://vue-advanced-chat.herokuapp.com/)
+
+A Progressive Web Application showcasing all the features of `vue-advanced-chat` component.<br>
+Built with Firestore, Vuetify, and Push Notifications.
+
+If you wish to get premium access to the real world example source code, please contact me by email.
+
+You will get a fully working chat application for web and mobile:
+
+- UI and backend integration
+- Email, Facebook and Google authentication
+- Real-time messaging, browser push notifications, images optimization (Firebase Cloud Functions to compress avatars)
+- UI/UX components for alerts (errors, information), dialogs, etc.
+- Add existing users to a room using their email
+- Send email invitations to non-existing users
+- Edition of profile and rooms
+- Addition and deletion of room users
+- Optimised firestore implementation to reduce bandwidth and costs as much as possible
+- State management using vuex
+- Internationalisation (i18n)
+- Google Analytics
+- Support to help you get the chat up and running
 
 ## Table of Contents
 
@@ -40,6 +66,8 @@ Enjoy :smile:
 - [Named Slots](#named-slots)
 - [Using with Firestore](#using-with-firestore)
 - [Use as a Web Component](#use-as-a-web-component)
+
+<br>
 
 ## Installation
 
@@ -57,7 +85,7 @@ You can import it as a custom component:
 
 ```javascript
 <template>
-  <chat-window :currentUserId="currentUserId" :rooms="rooms" :messages="messages" />
+  <chat-window :current-user-id="currentUserId" :rooms="rooms" :messages="messages" />
 </template>
 
 <script>
@@ -79,42 +107,131 @@ You can import it as a custom component:
 </script>
 ```
 
-## Props API
+### Important notes
 
-| Prop                     | Type             | Required | Default |
-| ------------------------ | ---------------- | -------- | ------- |
-| height                   | String           | -        | 600px   |
-| currentUserId (1)        | [String, Number] | true     | -       |
-| rooms                    | Array            | -        | [ ]     |
-| loadingRooms (2)         | Boolean          | -        | false   |
-| roomId (3)               | [String, Number] | -        | null    |
-| messages                 | Array            | -        | [ ]     |
-| messagesLoaded (4)       | Boolean          | -        | false   |
-| menuActions (5)          | Array            | -        | [ ]     |
-| messageActions (6)       | Array            | -        | (4)     |
-| showAddRoom              | Boolean          | -        | true    |
-| showFiles                | Boolean          | -        | true    |
-| showEmojis               | Boolean          | -        | true    |
-| showReactionEmojis       | Boolean          | -        | true    |
-| textMessages (7)         | Object           | -        | null    |
-| responsiveBreakpoint (8) | Number           | -        | 900     |
-| singleRoom (9)           | Number           | -        | false   |
-| theme (10)               | Sring            | -        | light   |
-| styles (11)              | Object           | -        | (10)    |
+`vue-advanced-chat` component is performance oriented, hence you have to follow specific rules to make it work properly.
 
-(1) `currentUserId` is required to display UI and trigger actions according to the user using the chat (ex: messages position on the right, etc.)
-
-(2) `loadingRooms` can be used to show/hide a spinner icon while rooms are loading
-
-(3) `roomId` can be used to load a specific room at any time
-
-(4) `messagesLoaded` must be manually set to `true` when all messages of a conversation have been loaded. Meaning the user cannot scroll on top anymore
-
-(5) `menuActions` can be used to display your own buttons when clicking the vertical dots icon inside a room.<br>
-You can then use the [menuActionHandler](#events-api) event to call your own action after clicking a button. Ex:
+- Use array assignement instead of `push` method
 
 ```javascript
-menuActions="[
+// DO THIS
+const rooms = []
+for (let i = 0; i < res.length; i++) {
+  rooms.push(res)
+}
+this.rooms = rooms
+
+// DON'T DO THIS
+for (let i = 0; i < res.length; i++) {
+  this.rooms.push(res)
+}
+```
+
+```javascript
+// DO THIS
+this.rooms[i].typingUsers = [...this.rooms[i].typingUsers, typingUserId]
+
+// DON'T DO THIS
+this.rooms[i].typingUsers.push(typingUserId)
+```
+
+- To add or replace an item inside an array, use `$set` method or spread operator
+
+```javascript
+// DO THIS
+this.$set(this.rooms, roomIndex, room)
+
+// OR DO THIS
+this.rooms[roomIndex] = room
+this.rooms = [...this.rooms]
+
+// DON'T DO THIS
+this.rooms[roomIndex] = room
+
+// AND DON'T DO THIS
+this.rooms.push(room)
+```
+
+- Follow the UI loading pattern by updating `messagesLoaded` prop every time a new room is fetched
+
+```javascript
+fetchMessages({ room, options }) {
+  this.messagesLoaded = false
+  this.messages = []
+
+  // use timeout to imitate async server fetched data
+  setTimeout(() => {
+    this.messagesLoaded = true
+  }, 0)
+}
+```
+
+<br>
+
+## Props API
+
+| <div style="width:230px">Prop</div> | Type             | Required | Default |
+| ----------------------------------- | ---------------- | -------- | ------- |
+| `height`                            | String           | -        | `600px` |
+| `current-user-id`(1)                | [String, Number] | `true`   | -       |
+| `rooms`                             | Array            | -        | `[]`    |
+| `loading-rooms`(2)                  | Boolean          | -        | `false` |
+| `rooms-loaded`(3)                   | Boolean          | -        | `false` |
+| `room-id`(4)                        | [String, Number] | -        | `null`  |
+| `load-first-room`(5)                | Boolean          | -        | `true`  |
+| `messages`                          | Array            | -        | `[]`    |
+| `room-message`(6)                   | String           | -        | `null`  |
+| `messages-loaded`(7)                | Boolean          | -        | `false` |
+| `room-actions`(8)                   | Array            | -        | `[]`    |
+| `menu-actions`(9)                   | Array            | -        | `[]`    |
+| `message-actions`(10)               | Array            | -        | (10)    |
+| `show-add-room`                     | Boolean          | -        | `true`  |
+| `show-send-icon`                    | Boolean          | -        | `true`  |
+| `show-files`                        | Boolean          | -        | `true`  |
+| `show-audio`                        | Boolean          | -        | `true`  |
+| `show-emojis`                       | Boolean          | -        | `true`  |
+| `show-reaction-emojis`              | Boolean          | -        | `true`  |
+| `show-new-messages-divider`(11)     | Boolean          | -        | `true`  |
+| `show-footer`(12)                   | Boolean          | -        | `true`  |
+| `text-messages`(13)                 | Object           | -        | `null`  |
+| `text-formatting`(14)               | Boolean          | -        | `true`  |
+| `responsive-breakpoint`(15)         | Number           | -        | `900`   |
+| `single-room`(16)                   | Boolean          | -        | `false` |
+| `theme`(17)                         | Sring            | -        | `light` |
+| `accepted-files`(18)                | String           | -        | `*`     |
+| `styles`(19)                        | Object           | -        | (19)    |
+
+**(1)** `current-user-id` is required to display UI and trigger actions according to the user using the chat (ex: messages position on the right, etc.)
+
+**(2)** `loading-rooms` can be used to show/hide a spinner icon while rooms are loading
+
+**(3)** `rooms-loaded` must be set to `true` when all rooms have been loaded. Meaning the user cannot scroll to load more paginated rooms
+
+**(4)** `room-id` can be used to load a specific room at any time
+
+**(5)** `load-first-room` can be used to remove the default behaviour of opening the first room at initialization
+
+**(6)** `room-message` can be used to add a default textarea value
+
+**(7)** `messages-loaded` must be set to `true` when all messages of a conversation have been loaded. Meaning the user cannot scroll on top to load more paginated messages
+
+**(8)** `room-actions` can be used to display your own buttons when clicking the dropdown icon of each room inside the rooms list.<br>
+You can then use the [room-action-handler](#events-api) event to call your own action after clicking a button. Ex:
+
+```javascript
+room-actions="[
+  {
+    name: 'archiveRoom',
+    title: 'Archive Room'
+  }
+]"
+```
+
+**(9)** `menu-actions` can be used to display your own buttons when clicking the vertical dots icon inside a room.<br>
+You can then use the [menu-action-handler](#events-api) event to call your own action after clicking a button. Ex:
+
+```javascript
+menu-actions="[
   {
     name: 'inviteUser',
     title: 'Invite User'
@@ -130,11 +247,11 @@ menuActions="[
 ]"
 ```
 
-(6) `messageActions` can be used to display your own buttons when clicking the dropdown icon inside a message.<br>
-You can then use the [messageActionHandler](#events-api) event to call your own action after clicking a button. Ex:
+**(10)** `message-actions` can be used to display your own buttons when clicking the dropdown icon inside a message.<br>
+You can then use the [message-action-handler](#events-api) event to call your own action after clicking a button. Ex:
 
 ```javascript
-messageActions="[
+message-actions="[
   {
     name: 'addMessageToFavorite',
     title: 'Add To Favorite'
@@ -146,7 +263,7 @@ messageActions="[
 ]"
 ```
 
-You can use built-in `messageActions` names to trigger specific UI modifications when clicked.<br>
+You can use built-in `message-actions` names to trigger specific UI modifications when clicked.<br>
 Currently, `replyMessage`, `editMessage` and `deleteMessage` action names are available.<br>
 If `messageActions` is not set, it will use the default values below.<br>
 If you don't want to display this `messageActions` menu, you can pass it an empty array.
@@ -170,136 +287,82 @@ messageActions="[
 ]"
 ```
 
-(7) `textMessages` can be used to replace default i18n texts. Ex:
+**(11)** `show-new-messages-divider` can be used to show/hide the blue line divider between seen and unseen messages.
+
+**(12)** `show-footer` can be used to hide the room footer. For example to prevent users to send any message or media.
+
+**(13)** `text-messages` can be used to replace default i18n texts. Ex:
 
 ```javascript
-textMessages="{
+text-messages="{
+  ROOMS_EMPTY: 'Aucune conversation',
+  ROOM_EMPTY: 'Aucune conversation sélectionnée',
   NEW_MESSAGES: 'Nouveaux messages',
   MESSAGE_DELETED: 'Ce message a été supprimé',
   MESSAGES_EMPTY: 'Aucun message',
   CONVERSATION_STARTED: 'La conversation a commencée le :',
-  TYPE_MESSAGE: 'Taper votre message',
-  SEARCH: 'Rechercher'
+  TYPE_MESSAGE: 'Tapez votre message',
+  SEARCH: 'Rechercher',
+  IS_ONLINE: 'est en ligne',
+  LAST_SEEN: 'dernière connexion ',
+  IS_TYPING: 'est en train de taper...'
 }"
 ```
 
-(8) `responsiveBreakpoint` can be used to collapse the rooms list on the left when then viewport size goes below the specified width.
+**(14)** `text-formatting` can be used to add text formatting. Currently, bold, italic, strikethrough, underline, inline code and multiline code formatting are available and can be used in conjonction. You can disable text formatting by passing the prop as `:textFormatting="false"`.
 
-(9) `singleRoom` can be used if you never want to show the rooms list on the left. You still need to pass the `rooms` prop as an array with a single element.
+| Style             | Syntax          | Example                                | Output                                 |
+| ----------------- | --------------- | -------------------------------------- | -------------------------------------- |
+| Bold              | `* *`           | `*This is bold text*`                  | **This is bold text**                  |
+| Italic            | `_ _`           | `_This text is italicized_`            | _This text is italicized_              |
+| Strikethrough     | `~ ~`           | `~This was mistaken text~`             | ~~This was mistaken text~~             |
+| Underline         | `° °`           | `°This text is underlined°`            | <ins>This text is underlined</ins>     |
+| Nested formatting | `* *` and `_ _` | `*This text is _extremely_ important*` | **This text is _extremely_ important** |
 
-(10) `theme` can be used to change the chat theme. Currently, only `light` and `dark` are available.
+**Inline Code**
 
-(11) `styles` can be used to customize your own theme. Ex:
+Example: \`This is inline code\`
+
+Output: `This is inline code`
+
+**Multiline Code**
+
+Example: \```This is multiline code\```
+
+Output:
+
+```bash
+This is
+multiline code
+```
+
+(14) `responsive-breakpoint` can be used to collapse the rooms list on the left when then viewport size goes below the specified width.
+
+(15) `single-room` can be used if you never want to show the rooms list on the left. You still need to pass the `rooms` prop as an array with a single element.
+
+(16) `theme` can be used to change the chat theme. Currently, only `light` and `dark` are available.
+
+(17) `accepted-files` can be used to set specifics file types allowed in chat. By default, all file types are allowed: `"*"`.
+
+Example: set `"accepted-files="image/png, image/jpeg, application/pdf"` to allow `JPG` `PNG` and `PDF` files
+
+(18) `styles` can be used to customize your own theme. You can find the full list [here](src/themes/index.js)
 
 ```javascript
 styles="{
   general: {
     color: '#0a0a0a',
-    backgroundInput: '#fff',
-    colorPlaceholder: '#9ca6af',
-    colorCaret: '#1976d2',
     colorSpinner: '#333',
-    borderStyle: '1px solid #e1e4e8',
-    backgroundScrollIcon: '#fff'
-  },
-
-  container: {
-    border: 'none',
-    borderRadius: '4px',
-    boxShadow: '0px 3px 1px 1px #000'
-  },
-
-  header: {
-    background: '#fff',
-    colorRoomName: '#0a0a0a',
-    colorRoomInfo: '#9ca6af'
+    borderStyle: '1px solid #e1e4e8'
   },
 
   footer: {
     background: '#f8f9fa',
-    borderStyleInput: '1px solid #e1e4e8',
-    borderInputSelected: '#1976d2',
     backgroundReply: 'rgba(0, 0, 0, 0.08)'
   },
 
-  content: {
-    background: '#f8f9fa'
-  },
-
-  sidemenu: {
-    background: '#fff',
-    backgroundHover: '#f6f6f6',
-    backgroundActive: '#e5effa',
-    colorActive: '#1976d2',
-    borderColorSearch: '#e1e5e8'
-  },
-
-  dropdown: {
-    background: '#fff',
-    backgroundHover: '#f6f6f6'
-  },
-
-  message: {
-    background: '#fff',
-    backgroundMe: '#ccf2cf',
-    color: '#0a0a0a',
-    colorStarted: '#9ca6af',
-    backgroundDeleted: '#dadfe2',
-    colorDeleted: '#757e85',
-    colorUsername: '#9ca6af',
-    colorTimestamp: '#828c94',
-    backgroundDate: '#e5effa',
-    colorDate: '#505a62',
-    backgroundReply: 'rgba(0, 0, 0, 0.08)',
-    colorReplyUsername: '#0a0a0a',
-    colorReply: '#6e6e6e',
-    backgroundImage: '#ddd',
-    colorNewMessages: '#1976d2',
-    backgroundReaction: '#eee',
-    borderStyleReaction: '1px solid #eee',
-    backgroundReactionHover: '#fff',
-    borderStyleReactionHover: '1px solid #ddd',
-    colorReactionCounter: '#0a0a0a',
-    backgroundReactionMe: '#cfecf5',
-    borderStyleReactionMe: '1px solid #3b98b8',
-    backgroundReactionHoverMe: '#cfecf5',
-    borderStyleReactionHoverMe: '1px solid #3b98b8',
-    colorReactionCounterMe: '#0b59b3'
-  },
-
-  room: {
-    colorUsername: '#0a0a0a',
-    colorMessage: '#67717a',
-    colorTimestamp: '#a2aeb8',
-    colorStateOnline: '#4caf50',
-    colorStateOffline: '#ccc'
-  },
-
-  emoji: {
-    background: '#fff'
-  },
-
   icons: {
-    search: '#9ca6af',
-    add: '#1976d2',
-    toggle: '#0a0a0a',
-    menu: '#0a0a0a',
-    close: '#9ca6af',
-    closeImage: '#fff',
-    file: '#1976d2',
-    paperclip: '#1976d2',
-    closeOutline: '#000',
-    send: '#1976d2',
-    sendDisabled: '#9ca6af',
-    emoji: '#1976d2',
-    emojiReaction: '#828c94',
-    document: '#1976d2',
-    pencil: '#9e9e9e',
-    checkmark: '#0696c7',
-    eye: '#fff',
-    dropdownMessage: '#fff',
-    dropdownMessageBackground: 'rgba(0, 0, 0, 0.25)',
-    dropdownScroll: '#0a0a0a'
+    search: '#9ca6af'
   }
 }"
 ```
@@ -315,12 +378,16 @@ rooms="[
   {
     roomId: 1,
     roomName: 'Room 1',
+    avatar: 'assets/imgs/people.png',
+    unreadCount: 4,
+    index: 3,
     lastMessage: {
       content: 'Last message received',
       sender_id: 1234,
       username: 'John Doe',
       timestamp: '10:20',
-      date: 123242424,
+      saved: true,
+      distributed: false,
       seen: false,
       new: true
     },
@@ -328,6 +395,7 @@ rooms="[
       {
         _id: 1234,
         username: 'John Doe',
+        avatar: 'assets/imgs/doe.png',
         status: {
           state: 'online',
           last_changed: 'today, 14:30'
@@ -336,6 +404,7 @@ rooms="[
       {
         _id: 4321,
         username: 'John Snow',
+        avatar: 'assets/imgs/snow.png',
         status: {
           state: 'offline',
           last_changed: '14 July, 20:00'
@@ -347,7 +416,8 @@ rooms="[
 ]"
 ```
 
-- If you set a `date` to `lastMessage` property, your rooms will be ordered using this date value
+- If you add the `index` property, your rooms will be ordered using this value.
+  `index` can be any sortable value, like a `string`, `datetime`, `timestamp`, etc.
 
 - For each room user, you can add the `status` property, which can hold the `state` and `last_changed` properties:
 
@@ -360,7 +430,16 @@ rooms="[
 
 Message objects are rendered differently depending on their type. Currently, only text, emoji and file types are supported.<br><br>
 Each message object has a `sender_id` field which holds the id of the corresponding agent. If `sender_id` matches the `currentUserId` prop, specific UI and actions will be implemented.<br><br>
-Note: `username` will be displayed on each message of corresponding agents if at least 3 users are in the room.
+Notes:
+
+- `username` will be displayed on each message of corresponding agents if at least 3 users are in the room
+- `system` is used to show messages with a specific centered display
+
+Message states:
+
+- `saved: true` one checkmark
+- `distributed: true` two checkmarks
+- `seen: true` two blue checkmarks
 
 ```javascript
 messages="[
@@ -371,6 +450,9 @@ messages="[
     username: 'John Doe',
     date: '13 November',
     timestamp: '10:20',
+    system: false,
+    saved: true,
+    distributed: true,
     seen: true,
     disable_actions: false,
     disable_reactions: false,
@@ -378,6 +460,8 @@ messages="[
       name: 'My File',
       size: 67351,
       type: 'png',
+      audio: true,
+      duration: 14.4,
       url: 'https://firebasestorage.googleapis.com/...'
     },
     reactions: {
@@ -393,27 +477,58 @@ messages="[
 ]"
 ```
 
+<br>
+
 ## Events API
 
-| Event                    | Params                                                          | Fires when                                            |
-| ------------------------ | --------------------------------------------------------------- | ----------------------------------------------------- |
-| fetchMessages (1)        | `{ room, options }`                                             | A user has scrolled on top to load more messages      |
-| sendMessage              | `{ roomId, content, file (4), replyMessage (5) }`               | A user has sent a message                             |
-| editMessage              | `{ roomId, messageId, newContent, file (4), replyMessage (5) }` | A user has edited a message                           |
-| deleteMessage            | `{ roomId, messageId }`                                         | A user has deleted a message                          |
-| openFile                 | `{ message }`                                                   | A user has clicked to view or download a file         |
-| addRoom                  | -                                                               | A user clicks on the plus icon next to searchbar      |
-| menuActionHandler (2)    | `{ roomId, action }`                                            | A user clicks on the vertical dots icon inside a room |
-| messageActionHandler (3) | `{ roomId, action }`                                            | A user clicks on the dropdown icon inside a message   |
-| sendMessageReaction      | `{ roomId, messageId, reaction, remove }`                       | A user clicks on the emoji icon inside a message      |
-| typingMessage            | `{ message, roomId }`                                           | A user is typing a message                            |
+| <div style="width:230px">Event</div> | Params                                                                  | Fires when a user                               |
+| ------------------------------------ | ----------------------------------------------------------------------- | ----------------------------------------------- |
+| `fetch-messages`(1)                  | `{ room, options }`                                                     | Scrolled on top to load more messages           |
+| `fetch-more-rooms`(2)                | -                                                                       | Scrolled to load more rooms                     |
+| `send-message`                       | `{ roomId, content, file(8), replyMessage(9), usersTag }`               | Sent a message                                  |
+| `edit-message`                       | `{ roomId, messageId, newContent, file(7), replyMessage(9) ,usersTag }` | Edited a message                                |
+| `delete-message`                     | `{ roomId, messageId }`                                                 | Deleted a message                               |
+| `open-file`                          | `{ message, action }`                                                   | Clicked to view or download a file              |
+| `open-user-tag`(3)                   | `{ user }`                                                              | Clicked on a user tag inside a message          |
+| `add-room`                           | -                                                                       | Clicked on the plus icon next to searchbar      |
+| `room-action-handler`(4)             | `{ roomId, action }`                                                    | Clicked on the vertical dots icon inside a room |
+| `menu-action-handler`(5)             | `{ roomId, action }`                                                    | Clicked on the vertical dots icon inside a room |
+| `message-action-handler`(6)          | `{ roomId, action, message }`                                           | Clicked on the dropdown icon inside a message   |
+| `send-message-reaction`              | `{ roomId, messageId, reaction, remove }`                               | Clicked on the emoji icon inside a message      |
+| `room-info`                          | `room`                                                                  | Clicked the room header bar                     |
+| `toggle-rooms-list`                  | `{ opened }`                                                            | Clicked on the toggle icon inside a room header |
+| `textarea-action-handler`(7)         | `{ roomId, message }`                                                   | Clicked on custom icon inside the footer        |
+| `typing-message`                     | `{ message, roomId }`                                                   | Started typing a message                        |
 
-(1) `fetchMessages` is triggered every time a room is opened. If the room is opened for the first time, the `options` param will hold `reset: true`
+**(1)** `fetch-messages` is triggered every time a room is opened. If the room is opened for the first time, the `options` param will hold `reset: true`.<br>
+**(1)** `fetch-messages` should be a method implementing a pagination system. Its purpose is to load older messages of a conversation when the user scroll on top.
 
-(1) `fetchMessages` should be a method implementing a pagination system. Its purpose is to load older messages of a conversation when the user scroll on top
+**(2)** `fetch-more-rooms` is triggered when scrolling down the rooms list, and should be a method implementing a pagination system.
 
-(2) `menuActionHandler` is the result of the `menuActions` prop.<br>
-When clicking a button from your `menuActions` array, `menuActionHandler` will give you the name of the button that was click.
+**(3)** `open-user-tag` is triggered when clicking a user tag inside a message. When creating a user tag by typing `@` in the footer textarea and sending the message, the tag will be identified with the below pattern:
+
+```javascript
+<usertag>TAGGED_USER_ID</usertag>
+```
+
+This will make the tag clickable inside a message. Ex: [message tag content](#messages-collection-inside-a-room-document)<br>
+`send-message` and `edit-message` events will handle that pattern for you and pass it in the `content` param.
+
+**(4)** `room-action-handler` is the result of the [`room-actions`](#props-api) prop.<br>
+When clicking a button from your `room-actions` array, `room-action-handler` will give you the name of the button that was click.
+Then you can do whatever you want with it. Ex:
+
+```javascript
+menuActionHandler({ roomId, action }) {
+  switch (action.name) {
+    case 'archiveRoom':
+      // call a method to archive the room
+  }
+}
+```
+
+**(5)** `menu-action-handler` is the result of the [`menu-actions`](#props-api) prop.<br>
+When clicking a button from your `menu-actions` array, `menu-action-handler` will give you the name of the button that was click.
 Then you can do whatever you want with it. Ex:
 
 ```javascript
@@ -429,12 +544,12 @@ menuActionHandler({ roomId, action }) {
 }
 ```
 
-(3) `messageActionHandler` is the result of the `messageActions` prop.<br>
-When clicking a button from your `messageActions` array, `messageActionHandler` will give you the name of the button that was click.
+**(6)** `message-action-handler` is the result of the [`message-actions`](#props-api) prop.<br>
+When clicking a button from your `message-actions` array, `message-action-handler` will give you the name of the button that was click and the corresponding message data.
 Then you can do whatever you want with it. Ex:
 
 ```javascript
-messageActionHandler({ roomId, action }) {
+messageActionHandler({ roomId, action, message }) {
   switch (action.name) {
     case 'addMessageToFavorite':
       // call a method to add a message to the favorite list
@@ -444,15 +559,62 @@ messageActionHandler({ roomId, action }) {
 }
 ```
 
-(4) All file params contain: `{ blob, localURL, name, size, type }`
+**(7)** `textarea-action-handler` can be used to add an extra icon on the right of the textarea, and recieve an event when clicking it.
 
-(5) `replyMessage` object is available when the user replied to another message by clicking the corresponding icon, and contains the message information that was clicked
+**(8)** All file params contain: `{ blob, localURL, name, size, type, extension }`
+
+**(9)** `replyMessage` object is available when the user replied to another message by clicking the corresponding icon, and contains the message information that was clicked.
+
+<br>
 
 ## Named Slots
 
-| Slot         | Action                                                     |
-| ------------ | ---------------------------------------------------------- |
-| rooms-header | Add a template on top of rooms list (above the search bar) |
+Example:
+
+```javascript
+<template v-slot:room-header="{ room, userStatus }">
+  {{ room.roomName }} - {{ userStatus }}
+</template>
+```
+
+| <div style="width:230px">Slot</div> | Action                                                      | Data                                | Overridden slots                                                                                                   |
+| ----------------------------------- | ----------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `rooms-header`                      | Add a template on top of rooms list (above the search bar)  | -                                   | -                                                                                                                  |
+| `room-list-item`                    | Replace the template of the room list items                 | `room`                              | `room-list-options`                                                                                                |
+| `room-list-options`                 | Replace the template of the list room options               | `room`                              | `room-list-options-icon`                                                                                           |
+| `room-header`                       | Replace the template of the room header                     | `room`, `typingUsers`, `userStatus` | `room-options`, `menu-icon`, `toggle-icon`                                                                         |
+| `room-header-avatar`                | Replace the template of the room header avatar              | `room`                              |
+| `room-header-info`                  | Replace the template of the room header text                | `room`, `typingUsers`, `userStatus` |
+| `room-options`                      | Replace the template of the room options                    | -                                   | menu-icon                                                                                                          |
+| `message`                           | Replace the template of the message box                     | `message`                           | `deleted-icon`, `eye-icon`, `document-icon`, `pencil-icon`, `checkmark-icon`, `dropdown-icon`, `emoji-picker-icon` |
+| `messages-empty`                    | Replace the empty message template                          | -                                   | -                                                                                                                  |
+| `rooms-empty`                       | Replace the empty rooms template                            | -                                   | -                                                                                                                  |
+| `no-room-selected`                  | Replace the no room selected template                       | -                                   | -                                                                                                                  |
+| `menu-icon`                         | Replace the room menu icon                                  | -                                   | -                                                                                                                  |
+| `toggle-icon`                       | Replace the toggle room list icon                           | -                                   | -                                                                                                                  |
+| `scroll-icon`                       | Replace the scroll to newest message icon                   | -                                   | -                                                                                                                  |
+| `reply-close-icon`                  | Replace the reply close icon                                | -                                   | -                                                                                                                  |
+| `image-close-icon`                  | Replace the image close icon                                | -                                   | -                                                                                                                  |
+| `file-icon`                         | Replace the file icon                                       | -                                   | -                                                                                                                  |
+| `file-close-icon`                   | Replace the file close icon                                 | -                                   | -                                                                                                                  |
+| `edit-close-icon`                   | Replace the edit close icon                                 | -                                   | -                                                                                                                  |
+| `emoji-picker-icon`                 | Replace the emoji picker icon                               | -                                   | -                                                                                                                  |
+| `emoji-picker-reaction-icon`        | Replace the emoji picker reaction icon (in the message box) | -                                   | -                                                                                                                  |
+| `paperclip-icon`                    | Replace the paperclip icon                                  | -                                   | -                                                                                                                  |
+| `send-icon`                         | Replace the message send icon                               | -                                   | -                                                                                                                  |
+| `eye-icon`                          | Replace the eye icon (image message)                        | -                                   | -                                                                                                                  |
+| `document-icon`                     | Replace the document icon                                   | -                                   | -                                                                                                                  |
+| `pencil-icon`                       | Replace the pencil icon                                     | -                                   | -                                                                                                                  |
+| `checkmark-icon`                    | Replace the checkmark icon                                  | `message`                           | -                                                                                                                  |
+| `deleted-icon`                      | Replace the deleted icon                                    | `deleted`                           | -                                                                                                                  |
+| `microphone-icon`                   | Replace the microphone icon                                 |                                     | -                                                                                                                  |
+| `microphone-off-icon`               | Replace the microphone-off icon                             |                                     | -                                                                                                                  |
+| `dropdown-icon`                     | Replace the dropdown icon                                   | -                                   | -                                                                                                                  |
+| `room-list-options-icon`            | Replace the room list options dropdown icon                 | -                                   | -                                                                                                                  |
+| `search-icon`                       | Replace the search icon                                     | -                                   | -                                                                                                                  |
+| `add-icon`                          | Replace the add room icon                                   | -                                   | -                                                                                                                  |
+
+<br>
 
 ## Using with Firestore
 
@@ -462,6 +624,7 @@ You can find the source code to implement a full featured chat app using Firebas
 <br>
 To test it using your own Firebase project:
 
+- Setup Cloud Firestore (to store users and rooms) and Realtime Database (to store users online status)
 - Clone this repository: `git clone https://github.com/antoine92190/vue-advanced-chat.git`
 - Inside `demo/src/firestore/index.js` file, replace the line `const config = ...` by your own Firebase config
 - Go inside `demo` folder and run `npm run serve`
@@ -508,13 +671,20 @@ chatRooms: {
 ```javascript
 messages: {
   MESSAGE_ID_1: {
-    content: 'My first message',
+    content: 'My first message to <usertag>John</usertag>',
     sender_id: 2,
     timestamp: 'December 11, 2019 at 4:00:00 PM',
     seen: true
   }
 }
 ```
+
+#### Notes
+
+- You need to create a composite index to order rooms by last message received.
+  The easiest way to do it is to create a room, then click the error message url in the browser debugging console.
+
+<br>
 
 ## Use as a Web Component
 
@@ -550,6 +720,8 @@ vue-advanced-chat/dist/vue-advanced-chat.min.js
 ```javascript
 import './vue-advanced-chat.min.js'
 ```
+
+<br>
 
 ## License
 

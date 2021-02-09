@@ -27,7 +27,8 @@ export const defaultThemeStyles = {
 			background: '#f8f9fa',
 			borderStyleInput: '1px solid #e1e4e8',
 			borderInputSelected: '#1976d2',
-			backgroundReply: 'rgba(0, 0, 0, 0.08)'
+			backgroundReply: '#e5e5e6',
+			backgroundTagActive: '#e5e5e6'
 		},
 
 		content: {
@@ -58,9 +59,13 @@ export const defaultThemeStyles = {
 			colorTimestamp: '#828c94',
 			backgroundDate: '#e5effa',
 			colorDate: '#505a62',
+			backgroundSystem: '#e5effa',
+			colorSystem: '#505a62',
+			backgroundMedia: 'rgba(0, 0, 0, 0.15)',
 			backgroundReply: 'rgba(0, 0, 0, 0.08)',
 			colorReplyUsername: '#0a0a0a',
 			colorReply: '#6e6e6e',
+			colorTag: '#0d579c',
 			backgroundImage: '#ddd',
 			colorNewMessages: '#1976d2',
 			backgroundReaction: '#eee',
@@ -75,12 +80,21 @@ export const defaultThemeStyles = {
 			colorReactionCounterMe: '#0b59b3'
 		},
 
+		markdown: {
+			background: 'rgba(239, 239, 239, 0.7)',
+			border: 'rgba(212, 212, 212, 0.9)',
+			color: '#e01e5a',
+			colorMulti: '#0a0a0a'
+		},
+
 		room: {
 			colorUsername: '#0a0a0a',
 			colorMessage: '#67717a',
 			colorTimestamp: '#a2aeb8',
 			colorStateOnline: '#4caf50',
-			colorStateOffline: '#9ca6af'
+			colorStateOffline: '#9ca6af',
+			backgroundCounterBadge: '#0696c7',
+			colorCounterBadge: '#fff'
 		},
 
 		emoji: {
@@ -103,11 +117,15 @@ export const defaultThemeStyles = {
 			emojiReaction: 'rgba(0, 0, 0, 0.3)',
 			document: '#1976d2',
 			pencil: '#9e9e9e',
-			checkmark: '#0696c7',
+			checkmark: '#9e9e9e',
+			checkmarkSeen: '#0696c7',
 			eye: '#fff',
 			dropdownMessage: '#fff',
 			dropdownMessageBackground: 'rgba(0, 0, 0, 0.25)',
-			dropdownScroll: '#0a0a0a'
+			dropdownRoom: '#9e9e9e',
+			dropdownScroll: '#0a0a0a',
+			microphone: '#1976d2',
+			microphoneOff: '#eb4034'
 		}
 	},
 	dark: {
@@ -115,7 +133,7 @@ export const defaultThemeStyles = {
 			color: '#fff',
 			backgroundInput: '#202223',
 			colorPlaceholder: '#596269',
-			colorCaret: '#1976d2',
+			colorCaret: '#fff',
 			colorSpinner: '#fff',
 			borderStyle: 'none',
 			backgroundScrollIcon: '#fff'
@@ -138,7 +156,8 @@ export const defaultThemeStyles = {
 			background: '#131415',
 			borderStyleInput: 'none',
 			borderInputSelected: '#1976d2',
-			backgroundReply: '#1b1c1c'
+			backgroundReply: '#1b1c1c',
+			backgroundTagActive: '#1b1c1c'
 		},
 
 		content: {
@@ -160,18 +179,22 @@ export const defaultThemeStyles = {
 
 		message: {
 			background: '#22242a',
-			backgroundMe: '#4fb381',
+			backgroundMe: '#1f7e80',
 			color: '#fff',
 			colorStarted: '#9ca6af',
 			backgroundDeleted: '#1b1c21',
 			colorDeleted: '#a2a5a8',
 			colorUsername: '#b3bac9',
 			colorTimestamp: '#ebedf2',
-			backgroundDate: 'rgba(0, 0, 0, 0.1)',
-			colorDate: '#9ca6af',
+			backgroundDate: 'rgba(0, 0, 0, 0.3)',
+			colorDate: '#bec5cc',
+			backgroundSystem: 'rgba(0, 0, 0, 0.3)',
+			colorSystem: '#bec5cc',
+			backgroundMedia: 'rgba(0, 0, 0, 0.18)',
 			backgroundReply: 'rgba(0, 0, 0, 0.18)',
 			colorReplyUsername: '#fff',
 			colorReply: '#d6d6d6',
+			colorTag: '#f0c60a',
 			backgroundImage: '#ddd',
 			colorNewMessages: '#fff',
 			backgroundReaction: 'none',
@@ -186,12 +209,21 @@ export const defaultThemeStyles = {
 			colorReactionCounterMe: '#fff'
 		},
 
+		markdown: {
+			background: 'rgba(239, 239, 239, 0.7)',
+			border: 'rgba(212, 212, 212, 0.9)',
+			color: '#e01e5a',
+			colorMulti: '#0a0a0a'
+		},
+
 		room: {
 			colorUsername: '#fff',
 			colorMessage: '#6c7278',
 			colorTimestamp: '#6c7278',
 			colorStateOnline: '#4caf50',
-			colorStateOffline: '#596269'
+			colorStateOffline: '#596269',
+			backgroundCounterBadge: '#1976d2',
+			colorCounterBadge: '#fff'
 		},
 
 		emoji: {
@@ -211,14 +243,18 @@ export const defaultThemeStyles = {
 			send: '#fff',
 			sendDisabled: '#646a70',
 			emoji: '#fff',
-			emojiReaction: 'rgba(0, 0, 0, 0.3)',
+			emojiReaction: '#fff',
 			document: '#1976d2',
 			pencil: '#ebedf2',
-			checkmark: '#f0d90a',
+			checkmark: '#ebedf2',
+			checkmarkSeen: '#f0d90a',
 			eye: '#fff',
 			dropdownMessage: '#fff',
 			dropdownMessageBackground: 'rgba(0, 0, 0, 0.25)',
-			dropdownScroll: '#0a0a0a'
+			dropdownRoom: '#fff',
+			dropdownScroll: '#0a0a0a',
+			microphone: '#fff',
+			microphoneOff: '#eb4034'
 		}
 	}
 }
@@ -232,6 +268,7 @@ export const cssThemeVars = ({
 	content,
 	dropdown,
 	message,
+	markdown,
 	room,
 	emoji,
 	icons
@@ -261,6 +298,7 @@ export const cssThemeVars = ({
 		'--chat-border-style-input': footer.borderStyleInput,
 		'--chat-border-color-input-selected': footer.borderInputSelected,
 		'--chat-footer-bg-color-reply': footer.backgroundReply,
+		'--chat-footer-bg-color-tag-active': footer.backgroundTagActive,
 
 		// content
 		'--chat-content-bg-color': content.background,
@@ -286,10 +324,14 @@ export const cssThemeVars = ({
 		'--chat-message-color-timestamp': message.colorTimestamp,
 		'--chat-message-bg-color-date': message.backgroundDate,
 		'--chat-message-color-date': message.colorDate,
+		'--chat-message-bg-color-system': message.backgroundSystem,
+		'--chat-message-color-system': message.colorSystem,
 		'--chat-message-color': message.color,
+		'--chat-message-bg-color-media': message.backgroundMedia,
 		'--chat-message-bg-color-reply': message.backgroundReply,
 		'--chat-message-color-reply-username': message.colorReplyUsername,
 		'--chat-message-color-reply-content': message.colorReply,
+		'--chat-message-color-tag': message.colorTag,
 		'--chat-message-bg-color-image': message.backgroundImage,
 		'--chat-message-color-new-messages': message.colorNewMessages,
 		'--chat-message-bg-color-reaction': message.backgroundReaction,
@@ -306,12 +348,20 @@ export const cssThemeVars = ({
 			message.borderStyleReactionHoverMe,
 		'--chat-message-color-reaction-counter-me': message.colorReactionCounterMe,
 
+		// markdown
+		'--chat-markdown-bg': markdown.background,
+		'--chat-markdown-border': markdown.border,
+		'--chat-markdown-color': markdown.color,
+		'--chat-markdown-color-multi': markdown.colorMulti,
+
 		// room
 		'--chat-room-color-username': room.colorUsername,
 		'--chat-room-color-message': room.colorMessage,
 		'--chat-room-color-timestamp': room.colorTimestamp,
 		'--chat-room-color-online': room.colorStateOnline,
 		'--chat-room-color-offline': room.colorStateOffline,
+		'--chat-room-bg-color-badge': room.backgroundCounterBadge,
+		'--chat-room-color-badge': room.colorCounterBadge,
 
 		// emoji
 		'--chat-emoji-bg-color': emoji.background,
@@ -333,9 +383,13 @@ export const cssThemeVars = ({
 		'--chat-icon-color-document': icons.document,
 		'--chat-icon-color-pencil': icons.pencil,
 		'--chat-icon-color-checkmark': icons.checkmark,
+		'--chat-icon-color-checkmark-seen': icons.checkmarkSeen,
 		'--chat-icon-color-eye': icons.eye,
 		'--chat-icon-color-dropdown-message': icons.dropdownMessage,
 		'--chat-icon-bg-dropdown-message': icons.dropdownMessageBackground,
-		'--chat-icon-color-dropdown-scroll': icons.dropdownScroll
+		'--chat-icon-color-dropdown-room': icons.dropdownRoom,
+		'--chat-icon-color-dropdown-scroll': icons.dropdownScroll,
+		'--chat-icon-color-microphone': icons.microphone,
+		'--chat-icon-color-microphone-off': icons.microphoneOff
 	}
 }
